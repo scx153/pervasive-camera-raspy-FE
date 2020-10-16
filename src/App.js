@@ -21,31 +21,40 @@ function App() {
     });
   }, [])
 
-  const submitdevice = () => {
-      Axios.post("http://localhost:3001/devices", {
-        device_id: device_id,
-        device_name: device_name,
-        maxcapacity: maxcapacity,
-        peoplecount: peoplecount
-        /*room_id: room_id,
-        room_name: room_name,
-        length: length,
-        width: width,*/
-      }).then(() => {
-        alert("berhasil input");
-      });
-  };
+  const getDevices = () => {
+    // Get data dari database pake Axios
+    // koding bla3
+    // var devices = Axios.get(....)
 
-  
+    // munculin dulu data dari database
+    // pake console log
+    // tinggal console.log(devices) 
+  }
+
+  const submitdevice = () => {
+    await Axios.post("http://localhost:3001/devices", {
+      device_id: device_id,
+      device_name: device_name,
+      maxcapacity: maxcapacity,
+      peoplecount: peoplecount
+      /*room_id: room_id,
+      room_name: room_name,
+      length: length,
+      width: width,*/
+    }).then(() => {
+      alert("berhasil input");
+    });
+
+    await getDevices();
+
+    // cari sendiri await itu apa
+  };
   
   return (
     <div className="App">
       <h1>CRUD GAN</h1>
 
       <div className="form">
-        
-        
-        
         <label>device_id</label>
         <input type="text" name="device_id" onChange={(e)=> {
           setdevice_id(e.target.value)
