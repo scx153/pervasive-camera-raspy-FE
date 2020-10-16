@@ -4,16 +4,22 @@ import Axios from 'axios';
 
 
 function App() {
-
  
-  const[device_id, setdevice_id] = useState('')
-  const[device_name, setdevice_name] = useState('')
-  const[maxcapacity, setmaxcapacity] = useState('')
-  const[peoplecount, setpeoplecount] = useState('')
+  const [device_id, setdevice_id] = useState("")
+  const [device_name, setdevice_name] = useState("")
+  const [maxcapacity, setmaxcapacity] = useState("")
+  const [peoplecount, setpeoplecount] = useState("")
+  const [listdevices, setdevices] = useState([])
 /*  const[room_id, setroom_id] = useState('')
   const[room_name, setroom_name] = useState('')
   const[length, setlength] = useState('')
   const[width, setwidth] = useState('') */
+
+  useEffect(() => {
+    Axios.get("http://localhost:3001/devices").then((response) => {
+      setdevices(response.data)
+    });
+  }, [])
 
   const submitdevice = () => {
       Axios.post("http://localhost:3001/devices", {
@@ -30,6 +36,7 @@ function App() {
       });
   };
 
+  
   
   return (
     <div className="App">
@@ -60,12 +67,31 @@ function App() {
         }}/>
         
         <button onClick={submitdevice}>submit</button>
+
+        {listdevices.map((value) => {
+          return (
+            <h1>
+              device_id: {value.device_id} | device_name: {value.device_name} | maxcapacity: {value.maxcapacity} | peoplecount: {value.peoplecount} | 
+            </h1>
+          );
+        })} 
+
+       
     </div>
   </div>
   );
 }
 
 export default App;
+
+/* {listdatadevice.map((value) => {
+          return (
+            <h1>
+              device_id: {value.device_id} | device_name: {value.device_name} | maxcapacity: {value.maxcapacity} | peoplecount: {value.peoplecount} | 
+            </h1>
+          );
+        })} */
+
 
 /*
 <label>room_id</label>
