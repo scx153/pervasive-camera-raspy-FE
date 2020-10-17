@@ -5,56 +5,73 @@ import Axios from 'axios';
 
 function App() {
  
-  const [device_id, setdevice_id] = useState("")
-  const [device_name, setdevice_name] = useState("")
-  const [maxcapacity, setmaxcapacity] = useState("")
-  const [peoplecount, setpeoplecount] = useState("")
+  const [device_id, setdevice_id] = useState(``)
+  const [device_name, setdevice_name] = useState(``)
+  const [maxcapacity, setmaxcapacity] = useState(``)
+  const [peoplecount, setpeoplecount] = useState(``)
   const [listdevices, setdevices] = useState([])
-/*  const[room_id, setroom_id] = useState('')
+  const [newdevice_name, setnewdevice_name] = useState(``)
+  const [newmaxcapacity, setnewmaxcapacity] = useState(``)
+  const [newpeoplecount, setnewpeoplecount] = useState(``)
+  /*  const[room_id, setroom_id] = useState('')
   const[room_name, setroom_name] = useState('')
   const[length, setlength] = useState('')
   const[width, setwidth] = useState('') */
 
   useEffect(() => {
-    Axios.get("http://localhost:3001/devices").then((response) => {
-      setdevices(response.data)
+    Axios.get(`http://localhost:3001/devices/get`).then((response) => {
+      console.log(response.data)  
+      setdevices(response.data.values)
+      
     });
   }, [])
 
-  const getDevices = () => {
-    // Get data dari database pake Axios
-    // koding bla3
-    // var devices = Axios.get(....)
+  const deleteDevice = (device_id) => {
+    Axios.delete(`http://localhost:3001/devices/delete/${device_id}/`).then((response) => {
+      console.log(response.data)
+    });
+  };
 
-    // munculin dulu data dari database
-    // pake console log
-    // tinggal console.log(devices) 
-  }
+  const updateDevice = (device_id) => {
+    Axios.put(`http://localhost:3001/devices/put/`,{
+        device_id: device_id,
+        device_name: newdevice_name,
+        maxcapacity: newmaxcapacity,
+        peoplecount: newpeoplecount
+    });
+    setnewdevice_name(""); setnewpeoplecount(""); setnewmaxcapacity("");
+  };
 
   const submitdevice = () => {
-    await Axios.post("http://localhost:3001/devices", {
-      device_id: device_id,
-      device_name: device_name,
-      maxcapacity: maxcapacity,
-      peoplecount: peoplecount
-      /*room_id: room_id,
-      room_name: room_name,
-      length: length,
-      width: width,*/
-    }).then(() => {
-      alert("berhasil input");
-    });
+      Axios.post("http://localhost:3001/devices/post", {
+        device_id: device_id,
+        device_name: device_name,
+        maxcapacity: maxcapacity,
+        peoplecount: peoplecount
+        /*room_id: room_id,
+        room_name: room_name,
+        length: length,
+        width: width,*/
+      });
 
-    await getDevices();
+      setdevices([...listdevices, 
+        {
+        device_id: device_id,
+        device_name: device_name,
+        maxcapacity: maxcapacity,
+        peoplecount: peoplecount
+        }
+      ]);
 
-    // cari sendiri await itu apa
   };
+  
   
   return (
     <div className="App">
       <h1>CRUD GAN</h1>
 
       <div className="form">
+        
         <label>device_id</label>
         <input type="text" name="device_id" onChange={(e)=> {
           setdevice_id(e.target.value)
@@ -79,9 +96,33 @@ function App() {
 
         {listdevices.map((value) => {
           return (
-            <h1>
-              device_id: {value.device_id} | device_name: {value.device_name} | maxcapacity: {value.maxcapacity} | peoplecount: {value.peoplecount} | 
-            </h1>
+            <div className="card">
+            <h1>{value.device_id}</h1>
+            <p>{value.device_name}</p>
+            <p>{value.maxcapacity}</p> 
+            <p>{value.peoplecount}</p> 
+
+            <button 
+              onClick={() =>{
+                deleteDevice(value.device_id)}}
+                >delete</button>
+            
+            <input type="text" id="updateInput" onChange={(e)=> {
+              setnewdevice_name(e.target.value) }}
+                />
+
+            <input type="text" id="updateInput" onChange={(e)=> {
+              setnewmaxcapacity(e.target.value) }}
+                />
+
+            <input type="text" id="updateInput" onChange={(e)=> {
+              setnewpeoplecount(e.target.value) }}
+                />
+
+                
+
+            <button onClick={()=>{updateDevice(value.device_id)}}>Update</button>
+            </div>
           );
         })} 
 
