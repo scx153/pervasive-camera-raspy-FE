@@ -1,165 +1,146 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
-import Axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { Switch, Route, Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+
+import AuthService from "./services/auth.service";
+
+import Login from "./components/Login";
+import Register from "./components/Register";
+import Home from "./components/Home";
+import Profile from "./components/Profile";
+import BoardUser from "./components/BoardUser";
+import BoardModerator from "./components/BoardModerator";
+import BoardDataDevice from "./components/BoardDataDevice";
+import BoardDataRoom from "./components/BoardDataRoom";
+import BoardNewData from "./components/BoardNewData";
 
 
-function App() {
- 
-  const [device_id, setdevice_id] = useState(``)
-  const [device_name, setdevice_name] = useState(``)
-  const [maxcapacity, setmaxcapacity] = useState(``)
-  const [peoplecount, setpeoplecount] = useState(``)
-  const [listdevices, setdevices] = useState([])
-  const [newdevice_name, setnewdevice_name] = useState(``)
-  const [newmaxcapacity, setnewmaxcapacity] = useState(``)
-  const [newpeoplecount, setnewpeoplecount] = useState(``)
-  /*  const[room_id, setroom_id] = useState('')
-  const[room_name, setroom_name] = useState('')
-  const[length, setlength] = useState('')
-  const[width, setwidth] = useState('') */
+
+const App = () => {
+  const [showModeratorBoard, setShowModeratorBoard] = useState(false);
+  const [showBoardDataDevice, setShowBoardDataDevice] = useState(false);
+  const [showBoardDataRoom, setShowBoardDataRoom] = useState(false);
+  const [ShowBoardNewData, setShowBoardNewData] = useState(false);
+  const [currentUser, setCurrentUser] = useState(undefined);
 
   useEffect(() => {
-    Axios.get(`http://localhost:3001/devices/get`).then((response) => {
-      console.log(response.data)  
-      setdevices(response.data.values)
-      
-    });
-  }, [])
+    const user = AuthService.getCurrentUser();
 
-  const deleteDevice = (device_id) => {
-    Axios.delete(`http://localhost:3001/devices/delete/${device_id}/`).then((response) => {
-      console.log(response.data)
-    });
+    if (user) {
+      setCurrentUser(user);
+      setShowModeratorBoard(user.roles.includes("ROLE_MODERATOR"));
+      setShowBoardDataDevice(user.roles.includes("ROLE_ADMIN"));
+      setShowBoardDataRoom(user.roles.includes("ROLE_ADMIN"));
+      setShowBoardNewData(user.roles.includes("ROLE_ADMIN"));
+    }
+  }, []);
+
+  const logOut = () => {
+    AuthService.logout();
   };
 
-  const updateDevice = (device_id) => {
-    Axios.put(`http://localhost:3001/devices/put/`,{
-        device_id: device_id,
-        device_name: newdevice_name,
-        maxcapacity: newmaxcapacity,
-        peoplecount: newpeoplecount
-    });
-    setnewdevice_name(""); setnewpeoplecount(""); setnewmaxcapacity("");
-  };
-
-  const submitdevice = () => {
-      Axios.post("http://localhost:3001/devices/post", {
-        device_id: device_id,
-        device_name: device_name,
-        maxcapacity: maxcapacity,
-        peoplecount: peoplecount
-        /*room_id: room_id,
-        room_name: room_name,
-        length: length,
-        width: width,*/
-      });
-
-      setdevices([...listdevices, 
-        {
-        device_id: device_id,
-        device_name: device_name,
-        maxcapacity: maxcapacity,
-        peoplecount: peoplecount
-        }
-      ]);
-
-  };
-  
-  
   return (
-    <div className="App">
-      <h1>CRUD GAN</h1>
+    <div>
+      <nav className="navbar navbar-expand navbar-dark bg-dark">
+        <Link to={"/"} className="navbar-brand">
+          Camera People
+        </Link>
+        <div className="navbar-nav mr-auto">
+          <li className="nav-item">
+            <Link to={"/home"} className="nav-link">
+              Home
+            </Link>
+          </li>
 
-      <div className="form">
-        
-        <label>device_id</label>
-        <input type="text" name="device_id" onChange={(e)=> {
-          setdevice_id(e.target.value)
-        }}/>
-        
-        <label>device_name</label>
-        <input type="text" name="device_name" onChange={(e)=> {
-          setdevice_name(e.target.value)
-        }}/>
-        
-        <label>maxcapacity</label>
-        <input type="text" name="maxcapacity" onChange={(e)=> {
-          setmaxcapacity(e.target.value)
-        }}/>
-        
-        <label>peoplecount</label>
-        <input type="text" name="peoplecount" onChange={(e)=> {
-          setpeoplecount(e.target.value)
-        }}/>
-        
-        <button onClick={submitdevice}>submit</button>
+          {showModeratorBoard && (
+            <li className="nav-item">
+              <Link to={"/mod"} className="nav-link">
+                Moderator Board
+              </Link>
+            </li>
+          )}
 
-        {listdevices.map((value) => {
-          return (
-            <div className="card">
-            <h1>{value.device_id}</h1>
-            <p>{value.device_name}</p>
-            <p>{value.maxcapacity}</p> 
-            <p>{value.peoplecount}</p> 
+          {ShowBoardNewData && (
+            <li className="nav-item">
+              <Link to={"/newdata"} className="nav-link">
+              Create New Room & Device
+              </Link>
+            </li>
+          )}
 
-            <button 
-              onClick={() =>{
-                deleteDevice(value.device_id)}}
-                >delete</button>
-            
-            <input type="text" id="updateInput" onChange={(e)=> {
-              setnewdevice_name(e.target.value) }}
-                />
+          {showBoardDataDevice && (
+            <li className="nav-item">
+              <Link to={"/data-device"} className="nav-link">
+                Data Device
+              </Link>
+            </li>
+          )}
 
-            <input type="text" id="updateInput" onChange={(e)=> {
-              setnewmaxcapacity(e.target.value) }}
-                />
+          {showBoardDataRoom && (
+            <li className="nav-item">
+              <Link to={"/data-room"} className="nav-link">
+                Data Room
+              </Link>
+            </li>
+          )}
 
-            <input type="text" id="updateInput" onChange={(e)=> {
-              setnewpeoplecount(e.target.value) }}
-                />
+      
 
-                
+          {currentUser && (
+            <li className="nav-item">
+              <Link to={"/user"} className="nav-link">
+                User Board
+              </Link>
+            </li>
+          )}
+        </div>
 
-            <button onClick={()=>{updateDevice(value.device_id)}}>Update</button>
-            </div>
-          );
-        })} 
+        {currentUser ? (
+          <div className="navbar-nav ml-auto">
+            <li className="nav-item">
+              <Link to={"/profile"} className="nav-link">
+                {currentUser.username}
+              </Link>
+            </li>
+            <li className="nav-item">
+              <a href="/login" className="nav-link" onClick={logOut}>
+                LogOut
+              </a>
+            </li>
+          </div>
+        ) : (
+          <div className="navbar-nav ml-auto">
+            <li className="nav-item">
+              <Link to={"/login"} className="nav-link">
+                Login
+              </Link>
+            </li>
 
-       
+            <li className="nav-item">
+              <Link to={"/register"} className="nav-link">
+                Sign Up
+              </Link>
+            </li>
+          </div>
+        )}
+      </nav>
+
+      <div className="container mt-3">
+        <Switch>
+          <Route exact path={["/", "/home"]} component={Home} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/register" component={Register} />
+          <Route exact path="/profile" component={Profile} />
+          <Route path="/user" component={BoardUser} />
+          <Route path="/mod" component={BoardModerator} />
+          <Route path="/data-device" component={BoardDataDevice} />
+          <Route path="/data-room" component={BoardDataRoom} />
+          <Route path="/newdata" component={BoardNewData} />
+        </Switch>
+      </div>
     </div>
-  </div>
   );
-}
+};
 
 export default App;
-
-/* {listdatadevice.map((value) => {
-          return (
-            <h1>
-              device_id: {value.device_id} | device_name: {value.device_name} | maxcapacity: {value.maxcapacity} | peoplecount: {value.peoplecount} | 
-            </h1>
-          );
-        })} */
-
-
-/*
-<label>room_id</label>
-<input type="text" name="room_id" onChange={(e)=> {
-  setroom_id(e.target.value)
-}}/>
-
-<label>room_info</label>
-<input type="text" name="room_info" onChange={(e)=> {
-  setroom_name(e.target.value)
-}}/>
-<label>length</label>
-<input type="text" name="length" onChange={(e)=> {
-  setlength(e.target.value)
-}}/>
-
-<label>width</label>
-<input type="text" name="width" onChange={(e)=> {
-  setwidth(e.target.value)
-}}/>
-*/
