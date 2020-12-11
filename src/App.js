@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Switch, Route, Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -15,6 +15,8 @@ import BoardDataDevice from "./components/BoardDataDevice";
 import BoardDataRoom from "./components/BoardDataRoom";
 import BoardNewData from "./components/BoardNewData";
 
+// socket.io
+import socketIOClient from "socket.io-client";
 
 
 const App = () => {
@@ -24,8 +26,18 @@ const App = () => {
   const [ShowBoardNewData, setShowBoardNewData] = useState(false);
   const [currentUser, setCurrentUser] = useState(undefined);
 
+  // socket io referece
+  const socketRef = useRef();
+
   useEffect(() => {
     const user = AuthService.getCurrentUser();
+
+    // socket io subscribe to pepCountWarning Event
+    socketRef.current = socketIOClient("http://localhost:3001",
+                                      { transports: ['websocket']});
+    socketRef.current.on("pepCountWarning", ({message}) => {
+      console.info(message);
+    });
 
     if (user) {
       setCurrentUser(user);
